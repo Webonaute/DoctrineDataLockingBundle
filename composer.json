@@ -1,0 +1,63 @@
+{
+  "name": "webonaute/doctrine-datalocking-bundle",
+  "type": "symfony-bundle",
+  "description": "Lock a list of object of the same entity to be executed by a single processor. When the lock is aquire, the lock ID generated can be use by a processor to execute action on that locked list.",
+  "keywords": [
+    "data",
+    "doctrine",
+    "symfony",
+    "bundle",
+    "symfony4",
+    "doctrine",
+    "locking",
+    "lock",
+    "process",
+    "performance",
+    "database",
+    "queue"
+  ],
+  "homepage": "https://github.com/Webonaute/DoctrineDataLockingBundle",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Mathieu Delisle",
+      "email": "mdelisle@webonaute.ca"
+    }
+  ],
+  "require": {
+    "php": ">=7.2",
+    "symfony/framework-bundle": "^3.4|^4.1",
+    "symfony/config": "^3.4|^4.1",
+    "symfony/console": "^3.4|^4.1",
+    "symfony/dependency-injection": "^3.4|^4.1",
+    "doctrine/doctrine-bundle": "^1.8"
+  },
+  "require-dev": {
+    "symfony/monolog-bundle": "^3.0",
+    "symfony/console": "^4.1",
+    "symfony/phpunit-bridge": "^4.1",
+    "symfony/browser-kit": "^4.1",
+    "symfony/profiler-pack": "^1.0",
+    "symfony/twig-bundle": "^4.1",
+    "phpunit/phpunit": "^6.0|^7.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Webonaute\\DoctrineDataLockingBundle\\": "./src"
+    }
+  },
+  "config": {
+    "bin-dir": "bin/",
+    "sort-packages": true
+  },
+  "support": {
+    "email": "mathieu@delisle.com",
+    "issue": "https://github.com/Webonaute/DoctrineDataLockingBundle/issues",
+    "source": "https://github.com/Webonaute/DoctrineDataLockingBundle"
+  },
+  "extra": {
+    "branch-alias": {
+      "dev-master": "1.0-dev"
+    }
+  }
+}

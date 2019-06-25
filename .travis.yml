@@ -1,0 +1,27 @@
+language: php
+
+php:
+  - 7.4
+  - 7.3
+  - 7.2
+  - 7.1
+  - 7.0
+
+sudo: false
+
+cache:
+  directories:
+    - $HOME/.composer/cache
+
+env:
+  global:
+    - SYMFONY_DEPRECATIONS_HELPER="weak"
+
+before_install:
+  - phpenv config-rm xdebug.ini || true
+  - phpenv rehash;
+  - composer self-update
+
+install: composer install --no-interaction --no-progress
+
+before_script: mkdir Webonaute && ln -s ../ Webonaute/WebonauteDoctrineDataLockingBundle

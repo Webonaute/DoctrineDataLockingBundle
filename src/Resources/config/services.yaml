@@ -1,0 +1,5 @@
+services:
+  Webonaute\DoctrineDataLockingBundle\Service\DataLocker:
+    arguments:
+      - '@doctrine'
+      - '@logger'
