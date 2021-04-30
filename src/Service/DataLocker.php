@@ -5,15 +5,12 @@ declare(strict_types=1);
 namespace Webonaute\DoctrineDataLockingBundle\Service;
 
 use DateTimeImmutable;
-use DateTimeInterface;
 use DateTimeZone;
-use Doctrine\Common\Persistence\ManagerRegistry;
-use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\Mapping\ClassMetadataInfo;
+use Doctrine\Persistence\ManagerRegistry;
+use Doctrine\Persistence\Mapping\ClassMetadata;
+use Doctrine\Persistence\ObjectManager;
 use Psr\Log\LoggerInterface;
 use function sprintf;
-use Symfony\Bridge\Doctrine\RegistryInterface;
 
 /**
  * Class DataLocker.
@@ -30,7 +27,7 @@ class DataLocker
      */
     private $logger;
 
-    public function __construct(RegistryInterface $doctrine, LoggerInterface $logger)
+    public function __construct(ManagerRegistry $doctrine, LoggerInterface $logger)
     {
         $this->doctrine = $doctrine;
         $this->logger = $logger;
@@ -64,6 +61,29 @@ class DataLocker
         return $lockedEntities;
     }
 
+    public function executeLock(string $entityClass, string $sqlQuery, array $parameters): int
+    {
+        /** @var ObjectManager $manager */
+        $manager = $this->doctrine
+            ->getManagerForClass($entityClass);
+        $connection = $manager->getConnection();
+
+        return $connection->executeUpdate($sqlQuery, $parameters);
+    }
+
+    public function findLocked(string $entityClass, string $lockId)
+    {
+        /** @var ObjectManager $manager */
+        $manager = $this->doctrine->getManagerForClass($entityClass);
+
+        return $manager->createQueryBuilder()
+            ->select('e')
+            ->from($entityClass, 'e')
+            ->where('e.processLock.lockId = :lockId')->setParameter('lockId', $lockId)
+            ->getQuery()
+            ->execute();
+    }
+
     /**
      * @param string $entityClass
      * @param int $limit
@@ -81,19 +101,6 @@ class DataLocker
         }
 
         return $lockedEntities;
-    }
-
-    public function findLocked(string $entityClass, string $lockId)
-    {
-        /** @var EntityManager $manager */
-        $manager = $this->doctrine->getManagerForClass($entityClass);
-
-        return $manager->createQueryBuilder()
-            ->select('e')
-            ->from($entityClass, 'e')
-            ->where('e.processLock.lockId = :lockId')->setParameter('lockId', $lockId)
-            ->getQuery()
-            ->execute();
     }
 
     /**
@@ -131,52 +138,15 @@ class DataLocker
         return null;
     }
 
-    public function unlock(string $entityClass, string $lockId)
-    {
-        /** @var EntityManagerInterface $manager */
-        $manager = $this->doctrine
-            ->getManagerForClass($entityClass);
-
-        return $manager->createQueryBuilder()->update($entityClass, 'e')
-            ->set('e.processLock.lockedAt', 'NULL')
-            ->set('e.processLock.lockId', 'NULL')
-            ->set('e.processLock.lockState', 'NULL')
-            ->where('e.processLock.lockId = :lockId')->setParameter('lockId', $lockId)
-            ->getQuery()
-            ->execute();
-    }
-
-    public function deleteLocked(string $entityClass, string $lockId)
-    {
-        /** @var EntityManagerInterface $manager */
-        $manager = $this->doctrine
-            ->getManagerForClass($entityClass);
-
-        return $manager->createQueryBuilder()->delete($entityClass, 'e')
-            ->where('e.processLock.lockId = :lockId')->setParameter('lockId', $lockId)
-            ->getQuery()
-            ->execute();
-    }
-
-    public function executeLock(string $entityClass, string $sqlQuery, array $parameters): int
-    {
-        /** @var EntityManagerInterface $manager */
-        $manager = $this->doctrine
-            ->getManagerForClass($entityClass);
-        $connection = $manager->getConnection();
-
-        return $connection->executeUpdate($sqlQuery, $parameters);
-    }
-
     protected function createLockQuery(string $entityClass, int $limit, ?string $extraWhere, bool $lockAtCondition = false): string
     {
         $manager = $this->doctrine->getManagerForClass($entityClass);
-        /** @var $classMetadata ClassMetadataInfo */
+        /** @var $classMetadata ClassMetadata */
         $classMetadata = $manager->getClassMetadata($entityClass);
 
         if (true === $lockAtCondition) {
             $extraWhere = "{$classMetadata->getColumnName('processLock.lockingAt')} <= ?"
-                .($extraWhere ? " AND ({$extraWhere})" : '');
+                . ($extraWhere ? " AND ({$extraWhere})" : '');
         }
 
         $sql = sprintf(
@@ -192,5 +162,32 @@ class DataLocker
         }
 
         return $sql;
+    }
+
+    public function unlock(string $entityClass, string $lockId)
+    {
+        /** @var ObjectManager $manager */
+        $manager = $this->doctrine
+            ->getManagerForClass($entityClass);
+
+        return $manager->createQueryBuilder()->update($entityClass, 'e')
+            ->set('e.processLock.lockedAt', 'NULL')
+            ->set('e.processLock.lockId', 'NULL')
+            ->set('e.processLock.lockState', 'NULL')
+            ->where('e.processLock.lockId = :lockId')->setParameter('lockId', $lockId)
+            ->getQuery()
+            ->execute();
+    }
+
+    public function deleteLocked(string $entityClass, string $lockId)
+    {
+        /** @var ObjectManager $manager */
+        $manager = $this->doctrine
+            ->getManagerForClass($entityClass);
+
+        return $manager->createQueryBuilder()->delete($entityClass, 'e')
+            ->where('e.processLock.lockId = :lockId')->setParameter('lockId', $lockId)
+            ->getQuery()
+            ->execute();
     }
 }
