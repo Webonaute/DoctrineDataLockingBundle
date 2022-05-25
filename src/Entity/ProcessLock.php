@@ -5,48 +5,36 @@ declare(strict_types=1);
 namespace Webonaute\DoctrineDataLockingBundle\Entity;
 
 use DateTime;
+use DateTimeImmutable;
+use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
  * !!! You should put a index on at least the lockId and lockState.
- *
- * @ORM\Embeddable
  */
+#[ORM\Embeddable]
 class ProcessLock
 {
-    /**
-     * @var string
-     *
-     * @ORM\Column(type="string", length=40, nullable=true)
-     */
-    private $lockId;
+    #[ORM\Column(type: 'string', length: 40, nullable: true)]
+    private ?string $lockId = null;
+
+    #[ORM\Column(type: 'string', length: 40, nullable: true)]
+    private ?string $lockState = null;
 
     /**
-     * @var string
-     *
-     * @ORM\Column(type="string", length=40, nullable=true)
+     * @var \DateTime|DateTimeImmutable|null
      */
-    private $lockState;
-
-    /**
-     * @var DateTime
-     *
-     * @ORM\Column(type="datetime", nullable=true)
-     */
-    private $lockedAt;
+    #[ORM\Column(type: 'datetime', nullable: true)]
+    private ?DateTimeInterface $lockedAt = null;
 
     /**
      * Prevent locking before this date.
      *
-     * @var DateTime
-     *
-     * @ORM\Column(name="lockingAt", type="datetime", nullable=true)
+     * @var \DateTime|DateTimeImmutable|null
      */
-    private $lockingAt;
+    #[ORM\Column(name: 'lockingAt', type: 'datetime', nullable: true)]
+    private ?DateTimeInterface $lockingAt = null;
 
-    /**
-     * @return null|string
-     */
     public function getLockId(): ?string
     {
         return $this->lockId;
@@ -61,9 +49,9 @@ class ProcessLock
     }
 
     /**
-     * @return null|DateTime
+     * @return \DateTime|DateTimeImmutable|null
      */
-    public function getLockedAt(): ?DateTime
+    public function getLockedAt(): ?DateTimeInterface
     {
         return $this->lockedAt;
     }
@@ -71,7 +59,7 @@ class ProcessLock
     /**
      * @param DateTime $lockedAt
      */
-    public function setLockedAt(?DateTime $lockedAt): void
+    public function setLockedAt(?DateTimeInterface $lockedAt): void
     {
         $this->lockedAt = $lockedAt;
     }
@@ -93,17 +81,17 @@ class ProcessLock
     }
 
     /**
-     * @return null|DateTime
+     * @return \DateTime|DateTimeImmutable|null
      */
-    public function getLockingAt(): ?DateTime
+    public function getLockingAt(): ?DateTimeInterface
     {
         return $this->lockingAt;
     }
 
     /**
-     * @param null|DateTime $lockingAt
+     * @param \DateTime|DateTimeImmutable|null $lockingAt
      */
-    public function setLockingAt(?DateTime $lockingAt): void
+    public function setLockingAt(?DateTimeInterface $lockingAt): void
     {
         $this->lockingAt = $lockingAt;
     }
