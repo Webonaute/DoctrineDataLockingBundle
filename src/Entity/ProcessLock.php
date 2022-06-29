@@ -20,6 +20,7 @@ class ProcessLock
      *
      * @ORM\Column(type="string", length=40, nullable=true)
      */
+    #[ORM\Column(type: 'string', length: 40, nullable: false)]
     private $lockId;
 
     /**
@@ -27,6 +28,7 @@ class ProcessLock
      *
      * @ORM\Column(type="string", length=40, nullable=true)
      */
+    #[ORM\Column(type: 'string', length: 40, nullable: true)]
     private $lockState;
 
     /**
@@ -34,6 +36,7 @@ class ProcessLock
      *
      * @ORM\Column(type="datetime", nullable=true)
      */
+    #[ORM\Column(type: 'datetime', nullable: true)]
     private $lockedAt;
 
     /**
@@ -43,6 +46,7 @@ class ProcessLock
      *
      * @ORM\Column(name="lockingAt", type="datetime", nullable=true)
      */
+    #[ORM\Column(name: 'lockingAt', type: 'datetime', nullable: true)]
     private $lockingAt;
 
     /**
